@@ -7,8 +7,9 @@ const UserSchema = mongoose.Schema({
 	firstName: {type: String, required: true},
 	lastName: {type: String, required: true},
 	email: {type: String, required: true},
-	currency: {type: String, required: true, default: 'USD'},
-	location: {type: String}
+	currency: {type: String, default: 'USD'},
+	location: {type: String, default: null},
+	ratio: {type: Object, default: {savings: 0.2, wants: 0.3, needs: 0.5}}
 });
 
 UserSchema.methods.serialize = function() {
@@ -16,11 +17,15 @@ UserSchema.methods.serialize = function() {
 		username: this.username || '',
 		firstName: this.firstName || '',
 		lastName: this.lastName || '',
+		email: this.email || '',
+		currency: this.currency || '',
+		location: this.location || '',
+		ratio: this.ratio || null
 	};
 };
 
 UserSchema.methods.validatePassword = function(password) {
-	return becrypt.compare(password, this.password);
+	return bcrypt.compare(password, this.password);
 };
 
 UserSchema.statics.hashPassword = function(password) {
