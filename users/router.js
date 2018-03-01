@@ -26,7 +26,6 @@ router.post('/', jsonParser, (req, res) => {
 		return User.create({username, password: hash, firstName, lastName, email, currency, location});
 	}).then(user => res.status(201).json(user.serialize()))
 		.catch(err => {
-			console.log(err);
 			return res.status(500).json({code: 500, message: 'Internal server error'});
 		});
 });
@@ -50,7 +49,6 @@ router.put('/ratio', jsonParser, (req, res) => {
 		.findOneAndUpdate({username: req.body.username}, {ratio: req.body.ratio})
 		.then(() => res.status(200).end())
 		.catch(err => {
-			console.log(err);
 			return res.status(500).json({code: 500, message: 'Internal server error'});
 		});
 });
