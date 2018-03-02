@@ -1,20 +1,14 @@
 'use strict';
-const passport = require('passport');
 const { User } = require('../users/model');
 const { Strategy: LocalStrategy } = require('passport-local');
 const { Strategy: JwtStrategy, ExtractJwt } = require('passport-jwt');
-const { validatePassword } = require('../users/model');
-const { JWT_SECRET, DATABASE } = require('../config');
-
-const { dbGet } = require('../db-mongoose');
+const { JWT_SECRET } = require('../config');
 
 const localStrategy = new LocalStrategy((username, password, callback) => {
 	let user;
 	User.findOne({ username: username }).then(_user => {
 		user = _user;
 		if (!user) {
-			// Return a rejected promise so we break out of the chain of .thens.
-			// Any errors like this will be handled in the catch block.
 			return Promise.reject({ reason: 'LoginError', message: 'Incorrect username or password' });
 		}
 
