@@ -6,6 +6,10 @@ const router = express.Router();
 const jsonParser = bodyParser.json();
 const {User} = require('./model');
 
+const passport = require('passport');
+const jwtAuth = passport.authenticate('jwt', { session: false });
+
+
 //Creates a new user.
 router.post('/', jsonParser, (req, res) => {
 	const requiredFields = ['username', 'password', 'firstName', 'lastName', 'email'];
@@ -31,7 +35,7 @@ router.post('/', jsonParser, (req, res) => {
 });
 
 //Updates user expense ratio.
-router.put('/ratio', jsonParser, (req, res) => {
+router.put('/ratio', jwtAuth, jsonParser, (req, res) => {
 	const requiredFields = ['savings', 'needs', 'wants'];
 	requiredFields.forEach(field => {
 		if (!req.body.ratio[field]) {
@@ -46,7 +50,7 @@ router.put('/ratio', jsonParser, (req, res) => {
 	}
 
 	return User
-		.findOneAndUpdate({username: req.body.username}, {ratio: req.body.ratio})
+		.findOneAndUpdate({username: req.user.username}, {ratio: req.body.ratio})
 		.then(() => res.status(200).end())
 		.catch(err => {
 			return res.status(500).json({code: 500, message: 'Internal server error'});
