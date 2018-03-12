@@ -8,10 +8,10 @@ const TransactionSchema = mongoose.Schema({
 	day: {type: Number, required: true, min: 1, max: 31},
 	currency: {type: String, default: 'USD'},
 	amount: {type: Number, required: true},
-	name: {type: String},
+	memo: {type: String},
 	source: {type: String},
 	recipient: {type: String},
-	category: {type: String},
+	category: {type: String, enum: ['housing', 'bills', 'loans', 'groceries', 'needs', 'entertainment', 'food & drink', 'savings', 'other'], required: true},
 	recurring: {type: Boolean, required: true},
 });
 
