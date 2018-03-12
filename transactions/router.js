@@ -4,6 +4,7 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const router = express.Router();
 const jsonParser = bodyParser.json();
+const {Transaction} = require('./models');
 
 const passport = require('passport');
 const jwtAuth = passport.authenticate('jwt', {session: false});
@@ -21,7 +22,35 @@ router.post('/', jwtAuth, jsonParser, (req, res) => {
 		}
 	});
     
-	const {type, year, month, day, currency, amount, memo, source, recipient, category, recurring} = req.body;
+	const {userId, type, year, month, day, currency, amount, memo, source, recipient, category, recurring} = req.body;
+
+	if ((month < 0) || (month > 12)) {
+		return res.status(422).json({message: 'Invalid month.'});
+	}
+
+	if (day < 0) {
+		return res.status(422).json({message: 'Invalid day.'});
+	}
+
+	if (month === 2) {
+		if (((year % 4 === 0) && (year % 100 !== 0)) || (year % 400 === 0)) {
+			if (day > 29) {
+				return res.status(422).json({message: 'Invalid day.'});
+			}
+		} else {
+			if (day > 28) {
+				return res.status(422).json({message: 'Invalid day.'});
+			}
+		}
+	} else if ([4, 6, 9, 11].includes(month)) {
+		if (day > 30) {
+			return res.status(422).json({message: 'Invalid day.'});
+		}
+	} else {
+		if (day > 31) {
+			return res.status(422).json({message: 'Invalid day.'});
+		}
+	}
     
 	if (!['income', 'expense', 'savings'].includes(type)) {
 		return res.status(422).json({message: 'Invalid type'});
@@ -39,7 +68,16 @@ router.post('/', jwtAuth, jsonParser, (req, res) => {
 		}
 	}
 
-	res.status(200).json({message: 'working'});
+	if (!['housing', 'bills', 'loans', 'groceries', 'needs', 'entertainment', 'food & drink', 'savings', 'other'].includes(category)) {
+		return res.status(422).json({message: 'Invalid transaction category.'});
+	}
+
+	Transaction
+		.create({userId, type, year, month, day, currency, amount, memo, source, recipient, category, recurring})
+		.then(transaction => res.status(201).json(transaction))
+		.catch(err => {
+			return res.status(500).json({code: 500, message: err});
+		});
 });
 
 module.exports = router;
