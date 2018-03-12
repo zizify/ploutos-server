@@ -80,4 +80,20 @@ router.post('/', jwtAuth, jsonParser, (req, res) => {
 		});
 });
 
+//deletes transactions
+router.delete('/', jwtAuth, jsonParser, (req, res) => {
+	Transaction
+		.findById(req.body.id)
+		.then(transaction => {
+			if (transaction.userId !== req.user._id) {
+				return res.status(422).json({message: 'Ids do not match.'});
+			}
+			
+			return Transaction.findByIdAndRemove({_id: req.body.id}).then(() => res.status(200).json({message: 'Successfully deleted.'}));})
+		.catch(err => {
+			console.log(err);
+			return res.status(500).json({code: 500, message: err});
+		});
+});
+
 module.exports = router;

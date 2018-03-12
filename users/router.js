@@ -10,7 +10,8 @@ const passport = require('passport');
 const jwtAuth = passport.authenticate('jwt', { session: false });
 
 
-//Creates a new user.
+//Creates a new user.>
+
 router.post('/', jsonParser, (req, res) => {
 	const requiredFields = ['username', 'password', 'firstName', 'lastName', 'email'];
 	requiredFields.forEach(field => {
