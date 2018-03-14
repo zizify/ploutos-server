@@ -30,4 +30,24 @@ const checkDate = (year, month, day) => {
 	return true;
 };
 
-module.exports = {checkDate};
+const checkTransaction = (type, amount, recipient, source) => {
+	if (!['income', 'expense', 'savings'].includes(type)) {
+		return 'Invalid type.';
+	} else if ((type === 'expense') || (type === 'savings')) {
+		if (amount > 0) {
+			return 'Amount should be zero or negative.';
+		} else if ((!recipient) || (source)) {
+			return `The ${type} type of transaction should have a recipient and no source.`;
+		}
+	} else if (type === 'income') {
+		if (amount < 0) {
+			return 'Amount should be zero or positive.';
+		} else if ((recipient) || (!source)) {
+			return `The ${type} type of transaction should have a source and no recipient.`;
+		}
+	}
+    
+	return false;
+};
+
+module.exports = {checkDate, checkTransaction};

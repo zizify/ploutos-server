@@ -9,7 +9,7 @@ const {Transaction} = require('./models');
 const passport = require('passport');
 const jwtAuth = passport.authenticate('jwt', {session: false});
 
-const {checkDate} = require('./checks');
+const {checkDate, checkTransaction} = require('./checks');
 
 
 //creates new transactions
@@ -30,21 +30,10 @@ router.post('/', jwtAuth, jsonParser, (req, res) => {
 	if (!checkDate(year, month, day)) {
 		return res.status(422).json({message: 'Invalid date.'});
 	}
-    
-	if (!['income', 'expense', 'savings'].includes(type)) {
-		return res.status(422).json({message: 'Invalid type'});
-	} else if ((type === 'expense') || (type === 'savings')) {
-		if (amount > 0) {
-			return res.status(422).json({message: 'Amount should be zero or negative.'});
-		} else if ((!recipient) || (source)) {
-			return res.status(422).json({message: `Invalid source/recipient for ${type} transaction type.`});
-		}
-	} else if (type === 'income') {
-		if (amount < 0) {
-			return res.status(422).json({message: 'Amount should be zero or positive.'});
-		} else if ((recipient) || (!source)) {
-			return res.status(422).json({message: `Invalid source/recipient for ${type} transaction type.`});
-		}
+
+	let transactionCheck = checkTransaction(type, amount, recipient, source);
+	if (transactionCheck) {
+		return res.status(422).json({message: transactionCheck});
 	}
 
 	if (!['housing', 'bills', 'loans', 'groceries', 'needs', 'entertainment', 'food & drink', 'savings', 'other'].includes(category)) {
