@@ -9,6 +9,9 @@ const {Transaction} = require('./models');
 const passport = require('passport');
 const jwtAuth = passport.authenticate('jwt', {session: false});
 
+const {checkDate} = require('./checks');
+
+
 //creates new transactions
 router.post('/', jwtAuth, jsonParser, (req, res) => {
 	if (req.user._id !== req.body.userId) {
@@ -24,32 +27,8 @@ router.post('/', jwtAuth, jsonParser, (req, res) => {
     
 	const {userId, type, year, month, day, currency, amount, memo, source, recipient, category, recurring} = req.body;
 
-	if ((month < 0) || (month > 12)) {
-		return res.status(422).json({message: 'Invalid month.'});
-	}
-
-	if (day < 0) {
-		return res.status(422).json({message: 'Invalid day.'});
-	}
-
-	if (month === 2) {
-		if (((year % 4 === 0) && (year % 100 !== 0)) || (year % 400 === 0)) {
-			if (day > 29) {
-				return res.status(422).json({message: 'Invalid day.'});
-			}
-		} else {
-			if (day > 28) {
-				return res.status(422).json({message: 'Invalid day.'});
-			}
-		}
-	} else if ([4, 6, 9, 11].includes(month)) {
-		if (day > 30) {
-			return res.status(422).json({message: 'Invalid day.'});
-		}
-	} else {
-		if (day > 31) {
-			return res.status(422).json({message: 'Invalid day.'});
-		}
+	if (!checkDate(year, month, day)) {
+		return res.status(422).json({message: 'Invalid date.'});
 	}
     
 	if (!['income', 'expense', 'savings'].includes(type)) {
@@ -79,6 +58,11 @@ router.post('/', jwtAuth, jsonParser, (req, res) => {
 			return res.status(500).json({code: 500, message: err});
 		});
 });
+
+//updates transactions
+router.put('/', jwtAuth, jsonParser, (req, res) => {
+
+})
 
 //deletes transactions
 router.delete('/', jwtAuth, jsonParser, (req, res) => {
